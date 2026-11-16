@@ -1,0 +1,9 @@
+[Unit]
+Description=Reconnect U of U VPN if it dropped
+
+[Service]
+Type=oneshot
+KillMode=process
+TimeoutStartSec=3min
+ExecStart=%h/.local/bin/uvpn-watch
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin

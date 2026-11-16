@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Print the current TOTP code for a KeePassXC entry, unattended.
+# The vault password lives in the GNOME keyring (unlocked at login),
+# so no prompt is needed. Only the 6-digit code is printed.
+#
+#   2fa "UofU Duo"
+#   2fa Siemens
+#   2fa --list
+set -euo pipefail
+
+DB="${TWOFA_DB:-$HOME/Passwords.kdbx}"
+
+pw() { secret-tool lookup service keepassxc-2fa; }
+
+case "${1:-}" in
+  ""|-h|--help) echo "usage: 2fa <entry> | 2fa --list" >&2; exit 2 ;;
+  --list) pw | keepassxc-cli ls -q "$DB" ;;
+  *) pw | keepassxc-cli show -q -t "$DB" "$1" ;;
+esac

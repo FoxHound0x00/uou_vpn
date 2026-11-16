@@ -1,0 +1,3 @@
+# Installed as /etc/sudoers.d/uvpn by install.sh. Lets @USER@ start the VPN wrapper and stop
+# openconnect without a password. Nothing else gets passwordless root.
+@USER@ ALL=(root) NOPASSWD: /usr/local/sbin/uvpn-oc, /usr/bin/pkill -INT openconnect

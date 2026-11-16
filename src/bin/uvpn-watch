@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Run every minute by uvpn-watch.timer. Healthy VPN costs one ping;
+# a full login happens only when the tunnel has been dead for two checks.
+S=~/.cache/uvpn; mkdir -p "$S"
+[ -e "$S/off" ] && exit 0                                    # you ran `uvpn down`
+flock -n "$S/lock" true || exit 0                            # a login is already running
+ping -c3 -i0.2 -W2 -I tun0 155.98.58.10 >/dev/null 2>&1 && { rm -f "$S/sick"; exit 0; }  # healthy
+[ -e "$S/sick" ] || { touch "$S/sick"; exit 0; }             # 1st miss: let openconnect self-heal
+sudo -n pkill -INT openconnect && sleep 3                    # 2nd miss: drop the dead tunnel
+curl -sfm 8 -o /dev/null https://vpn.utah.edu/global-protect/prelogin.esp || exit 0  # offline / captive portal
+[ -n "$(find "$S/last-fail" -mmin -5 2>/dev/null)" ] && exit 0  # 5-min backoff after a failed login
+uvpn && rm -f "$S/last-fail" || { touch "$S/last-fail"; notify-send uvpn "VPN login failed, retrying in 5 min"; }

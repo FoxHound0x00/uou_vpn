@@ -1,0 +1,6 @@
+#!/bin/sh
+# Root-owned: the only openconnect command sudo runs without a password (see /etc/sudoers.d/uvpn).
+case "$1" in ""|*[!A-Za-z0-9\\]*) echo "uvpn-oc: bad username" >&2; exit 1;; esac
+exec /usr/sbin/openconnect --protocol=gp --os=win --user="$1" --interface=tun0 \
+  --csd-user=@USER@ --csd-wrapper=/usr/libexec/openconnect/hipreport.sh \
+  --usergroup=gateway:prelogin-cookie --passwd-on-stdin --background vpn.utah.edu

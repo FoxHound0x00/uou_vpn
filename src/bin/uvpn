@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# U of U VPN: `uvpn` connect, `uvpn down` disconnect, `uvpn test` login only.
+D=$(dirname "$(readlink -f "$0")")/../..
+run=("$D/.venv/bin/python" "$D/src/uvpn.py" "$@")
+[ "${1:-}" = down ] && exec "${run[@]}"
+mkdir -p ~/.cache/uvpn
+flock -no -E 75 ~/.cache/uvpn/lock "${run[@]}"; rc=$?   # one login at a time
+[ $rc = 75 ] && echo "uvpn: a login is already running" >&2
+exit $rc
